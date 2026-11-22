@@ -19,8 +19,10 @@ import com.prem.portfolio.auth.repository.RoleRepository;
 import com.prem.portfolio.auth.repository.UserRepository;
 import com.prem.portfolio.auth.repository.UserRoleRepository;
 import com.prem.portfolio.auth.service.RefreshTokenService;
+import com.prem.portfolio.common.exception.ResourceNotFoundException;
 import com.prem.portfolio.superadmin.dto.SuperAdminUserResponse;
 import com.prem.portfolio.superadmin.mapper.SuperAdminMapper;
+import com.prem.portfolio.common.exception.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -158,7 +160,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Role newRole = roleRepository
                 .findByRoleNameIgnoreCase(normalizedRoleName)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
+                        new ResourceNotFoundException(
                                 "Role does not exist: " + normalizedRoleName
                         )
                 );
@@ -260,21 +262,23 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return toResponse(targetUser);
     }
 
-    private User findUser(Long userId) {
+    
+private User findUser(Long userId) {
 
-        if (userId == null || userId <= 0) {
-            throw new IllegalArgumentException(
-                    "A valid user ID is required."
-            );
-        }
-
-        return userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "User not found: " + userId
-                        )
-                );
+    if (userId == null || userId <= 0) {
+        throw new IllegalArgumentException(
+                "A valid user ID is required."
+        );
     }
+
+    return userRepository.findById(userId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "User not found: " + userId
+                    )
+            );
+}
+
 
     private User getCurrentActor() {
 
