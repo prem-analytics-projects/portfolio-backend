@@ -13,7 +13,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,15 +33,14 @@ public class CustomUserDetailsService implements UserDetailsService {
             throws UsernameNotFoundException {
 
         User user = userRepository.findByEmailIgnoreCase(email.trim())
-                .orElseThrow(() ->
-                        new UsernameNotFoundException(
-                                "User not found with email: " + email
-                        )
-                );
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "User not found with email: " + email
+                ));
 
         List<UserRole> userRoles =
                 userRoleRepository.findByUser_UserId(user.getUserId());
 
+        // Only approved roles become Spring Security authorities.
         Collection<GrantedAuthority> authorities = userRoles.stream()
                 .filter(userRole ->
                         userRole.getApprovalStatus() != null
@@ -62,9 +60,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     return new SimpleGrantedAuthority(roleName);
                 })
                 .distinct()
-                .map(authority ->
-                        (GrantedAuthority) authority
-                )
+                .map(authority -> (GrantedAuthority) authority)
                 .toList();
 
         boolean emailVerified = user.getEmailVerifiedAt() != null;
@@ -77,6 +73,16 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getAccountStatus() != null
                 && user.getAccountStatus().name().equals("LOCKED");
 
+        // A user must have at least one approved role.
+        boolean hasApprovedRole = !authorities.isEmpty();
+
+        // Login requires all three conditions:
+        // 1. Email verified
+        // 2. Account ACTIVE
+        // 3. At least one approved role
+        boolean accountEnabled =
+                emailVerified && accountActive && hasApprovedRole;
+
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPasswordHash())
@@ -84,7 +90,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .accountExpired(false)
                 .accountLocked(accountLocked)
                 .credentialsExpired(false)
-                .disabled(!emailVerified || !accountActive)
+                .disabled(!accountEnabled)
                 .build();
     }
 }

@@ -7,20 +7,17 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -28,24 +25,17 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // -----------------------------------------
-    // 1. PASSWORD ENCODER
-    // -----------------------------------------
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    // -----------------------------------------
-    // 2. AUTHENTICATION PROVIDER
-    // -----------------------------------------
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -58,10 +48,6 @@ public class SecurityConfig {
         return provider;
     }
 
-    // -----------------------------------------
-    // 3. AUTHENTICATION MANAGER
-    // -----------------------------------------
-
     @Bean
     public AuthenticationManager authenticationManager() {
 
@@ -69,10 +55,6 @@ public class SecurityConfig {
                 List.of(authenticationProvider())
         );
     }
-
-    // -----------------------------------------
-    // 4. SECURITY FILTER CHAIN
-    // -----------------------------------------
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -93,7 +75,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public endpoints
+                        // Public authentication endpoints
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/v1/auth/register",
@@ -103,17 +85,20 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh"
                         ).permitAll()
 
-                        // Authenticated endpoints
+                        // Super Admin endpoints
+                        .requestMatchers(
+                                "/api/v1/super-admin/**"
+                        ).hasRole("SUPER_ADMIN")
+                        
+                        // Authenticated user endpoints
                         .requestMatchers(
                                 "/api/v1/auth/logout",
                                 "/api/v1/auth/logout-all",
                                 "/api/v1/auth/me"
                         ).authenticated()
 
-                        // Error endpoint
                         .requestMatchers("/error").permitAll()
 
-                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
 

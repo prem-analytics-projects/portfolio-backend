@@ -1,5 +1,5 @@
 
-package com.prem.portfolio.superAdmin.bootstrap;
+package com.prem.portfolio.superadmin.bootstrap;
 
 import java.util.List;
 import java.util.Locale;

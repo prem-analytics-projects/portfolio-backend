@@ -181,7 +181,13 @@ public class AuthService {
                 userDetailsService.loadUserByUsername(
                         user.getEmail()
                 );
+                if (!userDetails.isEnabled()
+        || !userDetails.isAccountNonLocked()) {
 
+    throw new IllegalStateException(
+            "Your account is not eligible to refresh tokens."
+    );
+}
         // Rotate the existing refresh token.
         String newRefreshToken =
                 refreshTokenService.rotateRefreshToken(
