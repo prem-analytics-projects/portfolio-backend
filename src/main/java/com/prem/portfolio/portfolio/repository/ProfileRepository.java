@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.prem.portfolio.portfolio.entity.Profile;
 
+import java.util.Optional;
+
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
 
     // Search profiles by name/email and optionally filter by active status
@@ -27,4 +29,5 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
             @Param("active") Boolean active,
             Pageable pageable
     );
+    Optional<Profile> findByProfileIdAndActiveTrue(Long profileId);
 }
