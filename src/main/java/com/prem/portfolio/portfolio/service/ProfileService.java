@@ -1,7 +1,8 @@
 
 package com.prem.portfolio.portfolio.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.prem.portfolio.portfolio.dto.request.ProfileRequest;
 import com.prem.portfolio.portfolio.dto.response.ProfileResponse;
@@ -10,11 +11,18 @@ public interface ProfileService {
 
     ProfileResponse createProfile(ProfileRequest request);
 
-    List<ProfileResponse> getAllProfiles();
+    Page<ProfileResponse> getAllProfiles(
+            String search,
+            Boolean active,
+            Pageable pageable
+    );
 
     ProfileResponse getProfileById(Long profileId);
 
-    ProfileResponse updateProfile(Long profileId, ProfileRequest request);
+    ProfileResponse updateProfile(
+            Long profileId,
+            ProfileRequest request
+    );
 
     void deleteProfile(Long profileId);
 }

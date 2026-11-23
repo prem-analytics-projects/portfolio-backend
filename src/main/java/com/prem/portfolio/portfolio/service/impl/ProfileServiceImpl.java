@@ -3,8 +3,11 @@ package com.prem.portfolio.portfolio.service.impl;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.prem.portfolio.common.exception.ResourceNotFoundException;
 import com.prem.portfolio.media.entity.MediaAsset;
@@ -56,18 +59,37 @@ public class ProfileServiceImpl implements ProfileService {
 
         Profile savedProfile = profileRepository.save(profile);
 
-        return profileMapper.toResponse(savedProfile);
+        ProfileResponse response =
+                profileMapper.toResponse(savedProfile);
+
+        populateMediaUrls(response);
+
+        return response;
     }
 
-    // GET ALL PROFILES
+    // GET ALL PROFILES WITH SEARCH, FILTERING AND PAGINATION
     @Override
     @Transactional(readOnly = true)
-    public List<ProfileResponse> getAllProfiles() {
+    public Page<ProfileResponse> getAllProfiles(
+            String search,
+            Boolean active,
+            Pageable pageable) {
 
-        return profileRepository.findAll()
-                .stream()
-                .map(profileMapper::toResponse)
-                .toList();
+        Page<Profile> profiles = profileRepository.searchProfiles(
+                search,
+                active,
+                pageable
+        );
+
+        return profiles.map(profile -> {
+
+            ProfileResponse response =
+                    profileMapper.toResponse(profile);
+
+            populateMediaUrls(response);
+
+            return response;
+        });
     }
 
     // GET PROFILE BY ID
@@ -77,7 +99,12 @@ public class ProfileServiceImpl implements ProfileService {
 
         Profile profile = findProfileOrThrow(profileId);
 
-        return profileMapper.toResponse(profile);
+        ProfileResponse response =
+                profileMapper.toResponse(profile);
+
+        populateMediaUrls(response);
+
+        return response;
     }
 
     // UPDATE PROFILE
@@ -106,7 +133,12 @@ public class ProfileServiceImpl implements ProfileService {
 
         Profile updatedProfile = profileRepository.save(profile);
 
-        return profileMapper.toResponse(updatedProfile);
+        ProfileResponse response =
+                profileMapper.toResponse(updatedProfile);
+
+        populateMediaUrls(response);
+
+        return response;
     }
 
     // SOFT DELETE PROFILE
@@ -151,6 +183,44 @@ public class ProfileServiceImpl implements ProfileService {
                             + allowedTypes
             );
         }
+    }
+
+    // POPULATE PROFILE MEDIA URLS
+    private void populateMediaUrls(ProfileResponse response) {
+
+        response.setProfileImageUrl(
+                buildMediaUrl(response.getProfileImageId())
+        );
+
+        response.setResumeUrl(
+                buildMediaUrl(response.getResumeMediaId())
+        );
+    }
+
+    // BUILD MEDIA FILE URL
+    private String buildMediaUrl(Long mediaId) {
+
+        // Media is optional
+        if (mediaId == null) {
+            return null;
+        }
+
+        return mediaRepository.findById(mediaId)
+                .filter(media -> Boolean.TRUE.equals(media.getIsActive()))
+                .map(MediaAsset::getFileName)
+                .map(fileName ->
+                        ServletUriComponentsBuilder
+                                .fromCurrentContextPath()
+                                .pathSegment(
+                                        "api",
+                                        "v1",
+                                        "media",
+                                        "files",
+                                        fileName
+                                )
+                                .toUriString()
+                )
+                .orElse(null);
     }
 
     // COMMON PROFILE LOOKUP

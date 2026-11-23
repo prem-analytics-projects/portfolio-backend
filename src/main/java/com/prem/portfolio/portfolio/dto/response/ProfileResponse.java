@@ -12,16 +12,20 @@ public class ProfileResponse {
     private String phone;
     private String location;
     private String shortDescription;
+
     private Long profileImageId;
+    private String profileImageUrl;
+
     private Long resumeMediaId;
+    private String resumeUrl;
+
     private Boolean active;
+
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+
     private Long createdBy;
     private Long updatedBy;
-
-    public ProfileResponse() {
-    }
 
     public Long getProfileId() {
         return profileId;
@@ -87,12 +91,28 @@ public class ProfileResponse {
         this.profileImageId = profileImageId;
     }
 
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
     public Long getResumeMediaId() {
         return resumeMediaId;
     }
 
     public void setResumeMediaId(Long resumeMediaId) {
         this.resumeMediaId = resumeMediaId;
+    }
+
+    public String getResumeUrl() {
+        return resumeUrl;
+    }
+
+    public void setResumeUrl(String resumeUrl) {
+        this.resumeUrl = resumeUrl;
     }
 
     public Boolean getActive() {
