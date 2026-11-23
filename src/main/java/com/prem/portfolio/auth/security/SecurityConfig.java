@@ -87,8 +87,8 @@ public class SecurityConfig {
 
                         // Super Admin endpoints
                         .requestMatchers(
-                                "/api/v1/super-admin/**"
-                        ).hasRole("SUPER_ADMIN")
+        "/api/v1/admin/**"
+).hasAnyRole("ADMIN", "SUPER_ADMIN")
                         
                         // Authenticated user endpoints
                         .requestMatchers(

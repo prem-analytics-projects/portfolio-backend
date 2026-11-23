@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 
@@ -24,9 +25,21 @@ public class JwtService {
     private final long accessTokenExpirationMs;
 
     public JwtService(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token-expiration-ms:900000}")
+            @Value("${app.security.jwt.secret}") String secret,
+            @Value("${app.security.jwt.access-token-expiration:900000}")
             long accessTokenExpirationMs) {
+
+        if (!StringUtils.hasText(secret)) {
+            throw new IllegalStateException(
+                    "JWT secret is missing. Configure JWT_SECRET_BASE64."
+            );
+        }
+
+        if (accessTokenExpirationMs <= 0) {
+            throw new IllegalStateException(
+                    "JWT access token expiration must be positive."
+            );
+        }
 
         this.signingKey = Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(secret)
@@ -38,6 +51,7 @@ public class JwtService {
     public String generateAccessToken(UserDetails userDetails) {
 
         Date issuedAt = new Date();
+
         Date expiration = new Date(
                 issuedAt.getTime() + accessTokenExpirationMs
         );
@@ -74,7 +88,7 @@ public class JwtService {
             return username.equals(userDetails.getUsername())
                     && !isTokenExpired(token);
 
-        } catch (JwtException | IllegalArgumentException ex) {
+        } catch (JwtException | IllegalArgumentException exception) {
             return false;
         }
     }
