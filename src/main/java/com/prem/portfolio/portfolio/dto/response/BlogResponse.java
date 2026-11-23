@@ -2,6 +2,7 @@
 package com.prem.portfolio.portfolio.dto.response;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 public class BlogResponse {
 
@@ -26,6 +27,9 @@ public class BlogResponse {
 
     private Long createdBy;
     private Long updatedBy;
+
+    private List<BlogCategoryMappingResponse> categories;
+    private List<BlogTagMappingResponse> tags;
 
     public Long getBlogId() {
         return blogId;
@@ -153,5 +157,22 @@ public class BlogResponse {
 
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public List<BlogCategoryMappingResponse> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(
+            List<BlogCategoryMappingResponse> categories) {
+        this.categories = categories;
+    }
+
+    public List<BlogTagMappingResponse> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<BlogTagMappingResponse> tags) {
+        this.tags = tags;
     }
 }

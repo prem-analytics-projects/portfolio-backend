@@ -15,7 +15,9 @@ import com.prem.portfolio.portfolio.entity.Blog;
 import com.prem.portfolio.portfolio.mapper.BlogMapper;
 import com.prem.portfolio.portfolio.repository.BlogRepository;
 import com.prem.portfolio.portfolio.repository.ProfileRepository;
+import com.prem.portfolio.portfolio.service.BlogCategoryMappingService;
 import com.prem.portfolio.portfolio.service.BlogService;
+import com.prem.portfolio.portfolio.service.BlogTagMappingService;
 
 @Service
 @Transactional
@@ -25,17 +27,23 @@ public class BlogServiceImpl implements BlogService {
     private final ProfileRepository profileRepository;
     private final MediaRepository mediaRepository;
     private final BlogMapper blogMapper;
+    private final BlogCategoryMappingService blogCategoryMappingService;
+    private final BlogTagMappingService blogTagMappingService;
 
     public BlogServiceImpl(
             BlogRepository blogRepository,
             ProfileRepository profileRepository,
             MediaRepository mediaRepository,
-            BlogMapper blogMapper) {
+            BlogMapper blogMapper,
+            BlogCategoryMappingService blogCategoryMappingService,
+            BlogTagMappingService blogTagMappingService) {
 
         this.blogRepository = blogRepository;
         this.profileRepository = profileRepository;
         this.mediaRepository = mediaRepository;
         this.blogMapper = blogMapper;
+        this.blogCategoryMappingService = blogCategoryMappingService;
+        this.blogTagMappingService = blogTagMappingService;
     }
 
     @Override
@@ -216,6 +224,7 @@ public class BlogServiceImpl implements BlogService {
 
         BlogResponse response = blogMapper.toResponse(blog);
 
+        // Populate cover image URL
         if (blog.getCoverMediaId() != null) {
 
             mediaRepository.findById(blog.getCoverMediaId())
@@ -224,6 +233,16 @@ public class BlogServiceImpl implements BlogService {
                     .ifPresent(media ->
                             response.setCoverImageUrl(media.getFileUrl()));
         }
+
+        // Populate assigned categories
+        response.setCategories(
+                blogCategoryMappingService.getBlogCategories(
+                        blog.getBlogId()));
+
+        // Populate assigned tags
+        response.setTags(
+                blogTagMappingService.getBlogTags(
+                        blog.getBlogId()));
 
         return response;
     }

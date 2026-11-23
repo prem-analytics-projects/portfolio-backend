@@ -93,6 +93,17 @@ public class SecurityConfig {
         HttpMethod.GET,
         "/api/v1/media/files/**"
 ).permitAll()
+// Public contact form submission
+.requestMatchers(
+        HttpMethod.POST,
+        "/api/v1/public/contact-messages"
+).permitAll()
+
+.requestMatchers(
+        HttpMethod.GET,
+        "/api/v1/public/website-settings"
+).permitAll()
+
                         
                         // Authenticated user endpoints
                         .requestMatchers(
