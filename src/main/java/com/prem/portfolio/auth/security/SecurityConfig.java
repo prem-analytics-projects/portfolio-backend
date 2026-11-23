@@ -89,6 +89,10 @@ public class SecurityConfig {
                         .requestMatchers(
         "/api/v1/admin/**"
 ).hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers(
+        HttpMethod.GET,
+        "/api/v1/media/files/**"
+).permitAll()
                         
                         // Authenticated user endpoints
                         .requestMatchers(
