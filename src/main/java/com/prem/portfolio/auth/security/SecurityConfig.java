@@ -85,26 +85,29 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh"
                         ).permitAll()
 
-                        // Super Admin endpoints
+                        // Admin endpoints
                         .requestMatchers(
-        "/api/v1/admin/**"
-).hasAnyRole("ADMIN", "SUPER_ADMIN")
+                                "/api/v1/admin/**"
+                        ).hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                        // Public media retrieval
                         .requestMatchers(
-        HttpMethod.GET,
-        "/api/v1/media/files/**"
-).permitAll()
-// Public contact form submission
-.requestMatchers(
-        HttpMethod.POST,
-        "/api/v1/public/contact-messages"
-).permitAll()
+                                HttpMethod.GET,
+                                "/api/v1/media/files/**"
+                        ).permitAll()
 
-.requestMatchers(
-        HttpMethod.GET,
-        "/api/v1/public/website-settings"
-).permitAll()
+                        // Public read-only website APIs
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/public/**"
+                        ).permitAll()
 
-                        
+                        // Public contact form submission
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/public/contact-messages"
+                        ).permitAll()
+
                         // Authenticated user endpoints
                         .requestMatchers(
                                 "/api/v1/auth/logout",
@@ -114,6 +117,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/error").permitAll()
 
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
 
